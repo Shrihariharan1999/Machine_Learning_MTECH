@@ -1,6 +1,0 @@
-{
-  "kind": "drive#file",
-  "id": "1wEBd3M2HxMJcgEfWmUYuHOV-_iNOc215",
-  "name": "titanic-spaceship-competition.ipynb.txt",
-  "mimeType": "application/vnd.google.colaboratory"
-}
