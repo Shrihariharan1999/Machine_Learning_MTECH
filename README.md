@@ -2,6 +2,18 @@
 
 A comprehensive, well-organized collection of Machine Learning and Deep Learning notebooks from MTech coursework. This repository contains practical experiments, assignments, and projects covering the entire ML/DL spectrum.
 
+## 🚨 IMPORTANT: Current Status (July 2026)
+
+> **Issue Found:** Notebooks are currently empty due to a flawed Colab sync script that didn't preserve content.
+> 
+> **Status:** All 77 notebooks need to be re-synced from Google Drive with the improved script.
+> 
+> **Solution:** See [`SYNC_SETUP_GUIDE.md`](SYNC_SETUP_GUIDE.md) for detailed instructions on using the fixed sync script.
+> 
+> **Action Required:** Follow the guide to re-sync notebooks from Google Drive. This will restore all content.
+> 
+> See [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) for detailed diagnostic information.
+
 ## 📚 Repository Structure
 
 ### 01_Fundamentals
