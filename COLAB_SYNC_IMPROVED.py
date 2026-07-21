@@ -7,6 +7,27 @@
 # Usage: Run this in Google Colab
 # ============================================================================
 
+# QUICK START - 3 SIMPLE STEPS:
+# ============================================================================
+# 1. GET YOUR GITHUB TOKEN:
+#    - Go to: https://github.com/settings/tokens
+#    - Click "Generate new token" → "Generate new token (classic)"
+#    - Select scope: ✓ repo
+#    - Copy the token (you won't see it again!)
+#    - Paste it below after "GITHUB_TOKEN = "
+#
+# 2. GET YOUR GOOGLE DRIVE FOLDER ID:
+#    - Open Google Drive and navigate to your ML notebooks folder
+#    - Look at the URL: https://drive.google.com/drive/folders/FOLDER_ID_HERE
+#    - Copy the FOLDER_ID_HERE part
+#    - Paste it below after "DRIVE_FOLDER_ID = "
+#
+# 3. RUN THIS SCRIPT IN COLAB:
+#    - Copy ALL code below into a Colab cell
+#    - Click "Run"
+#    - Done!
+# ============================================================================
+
 import requests
 import base64
 from google.colab import drive
@@ -26,6 +47,70 @@ BRANCH = "main"
 
 # Google Drive Configuration
 DRIVE_FOLDER_ID = "your_google_drive_folder_id"  # The folder ID containing your notebooks
+
+# ============================================================================
+# VALIDATION FUNCTION
+# ============================================================================
+
+def validate_configuration():
+    """Validate that all configuration values have been updated"""
+    print("Validating configuration...")
+    print()
+    
+    errors = []
+    
+    # Check GitHub Token
+    if GITHUB_TOKEN == "your_github_token_here":
+        errors.append(
+            "❌ GITHUB_TOKEN not configured\n"
+            "   Get your token from: https://github.com/settings/tokens\n"
+            "   Update line: GITHUB_TOKEN = 'your_actual_token_here'"
+        )
+    elif len(GITHUB_TOKEN) < 20:
+        errors.append(
+            "⚠ GITHUB_TOKEN seems too short\n"
+            "   GitHub tokens are usually 40+ characters"
+        )
+    
+    # Check Google Drive Folder ID
+    if DRIVE_FOLDER_ID == "your_google_drive_folder_id":
+        errors.append(
+            "❌ DRIVE_FOLDER_ID not configured\n"
+            "   How to get your folder ID:\n"
+            "   1. Open your Google Drive folder with notebooks\n"
+            "   2. Look at the URL: https://drive.google.com/drive/folders/YOUR_ID_HERE\n"
+            "   3. Copy the YOUR_ID_HERE part\n"
+            "   Update line: DRIVE_FOLDER_ID = 'your_actual_folder_id_here'"
+        )
+    elif len(DRIVE_FOLDER_ID) < 20:
+        errors.append(
+            "⚠ DRIVE_FOLDER_ID seems too short\n"
+            "   Google Drive IDs are usually 25+ characters"
+        )
+    
+    # Check Owner
+    if OWNER == "your_username":
+        errors.append(
+            "❌ OWNER not configured\n"
+            "   Update line: OWNER = 'your_github_username'"
+        )
+    
+    if errors:
+        print("=" * 70)
+        print("CONFIGURATION ERRORS FOUND")
+        print("=" * 70)
+        for i, error in enumerate(errors, 1):
+            print(f"\n{i}. {error}")
+        print("\n" + "=" * 70)
+        print("Please fix the errors above and try again.")
+        print("=" * 70)
+        return False
+    
+    print("✓ Configuration validated successfully!")
+    print(f"  GitHub: {OWNER}/{REPO}")
+    print(f"  Drive Folder: {DRIVE_FOLDER_ID[:30]}...")
+    print()
+    return True
 
 # ============================================================================
 # HELPER FUNCTIONS
@@ -128,6 +213,11 @@ def sync_notebooks():
     print("="*70)
     print("GOOGLE DRIVE TO GITHUB NOTEBOOK SYNC")
     print("="*70)
+    print()
+    
+    # Validate configuration first
+    if not validate_configuration():
+        return
     
     # Import required libraries
     from googleapiclient.discovery import build
@@ -139,9 +229,19 @@ def sync_notebooks():
     print("✓ Authenticated")
     
     # Get folder structure
-    print(f"\n2. Scanning Google Drive folder (ID: {DRIVE_FOLDER_ID[:20]}...)...")
-    files_dict = get_folder_structure(drive_service, DRIVE_FOLDER_ID)
-    print(f"✓ Found {len(files_dict)} notebook(s)")
+    print(f"\n2. Scanning Google Drive folder...")
+    try:
+        files_dict = get_folder_structure(drive_service, DRIVE_FOLDER_ID)
+        print(f"✓ Found {len(files_dict)} notebook(s)")
+    except Exception as e:
+        print(f"\n❌ Error accessing Google Drive folder:")
+        print(f"   {str(e)}")
+        print(f"\n   Possible causes:")
+        print(f"   1. DRIVE_FOLDER_ID is incorrect or has not been updated")
+        print(f"   2. You don't have access to the folder")
+        print(f"   3. The folder has been deleted")
+        print(f"\n   Current DRIVE_FOLDER_ID: {DRIVE_FOLDER_ID}")
+        return
     
     if len(files_dict) == 0:
         print("❌ No notebooks found. Check DRIVE_FOLDER_ID")
@@ -228,6 +328,16 @@ if __name__ == "__main__":
     try:
         sync_notebooks()
     except Exception as e:
-        print(f"\n❌ Fatal error: {e}")
+        print(f"\n{'='*70}")
+        print("❌ FATAL ERROR")
+        print(f"{'='*70}")
+        print(f"\nError: {e}")
+        print(f"\nCommon fixes:")
+        print(f"  1. Make sure GITHUB_TOKEN is set correctly")
+        print(f"  2. Make sure DRIVE_FOLDER_ID is set correctly")
+        print(f"  3. Check that both are actual values, not placeholder text")
+        print(f"  4. Make sure you have access to the Google Drive folder")
+        print(f"\nFull traceback:")
         import traceback
         traceback.print_exc()
+        print(f"\n{'='*70}")
