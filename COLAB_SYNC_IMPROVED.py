@@ -4,6 +4,10 @@
 # This script properly downloads notebooks from Google Drive with all content
 # and uploads them to GitHub while preserving folder structure.
 # 
+# Supports BOTH:
+#   - Google Colaboratory notebooks (.ipynb files in Colab format)
+#   - Regular .ipynb files (uploaded to Google Drive as regular files)
+# 
 # Usage: Run this in Google Colab
 # ============================================================================
 
@@ -154,16 +158,35 @@ def get_folder_structure(drive_service, folder_id, path=""):
 
 def export_notebook_from_drive(drive_service, file_id):
     """
-    Export notebook from Google Drive in .ipynb format
-    This is the KEY fix - using export instead of get with alt='media'
+    Download notebook from Google Drive
+    Handles both Google Colab files and regular .ipynb files
     """
     try:
-        # Use files().export_media for proper notebook export
-        request = drive_service.files().export_media(
-            fileId=file_id,
-            mimeType='application/ipynb'
-        )
+        # First, try to export as Colab file
+        try:
+            request = drive_service.files().export_media(
+                fileId=file_id,
+                mimeType='application/ipynb'
+            )
+            fh = BytesIO()
+            downloader = MediaIoBaseDownload(fh, request)
+            done = False
+            while done is False:
+                status, done = downloader.next_chunk()
+            
+            notebook_content = fh.getvalue()
+            fh.close()
+            
+            # Verify it's valid JSON and has cells
+            notebook_json = json.loads(notebook_content)
+            if 'cells' in notebook_json:
+                return notebook_content
+        except:
+            # If export fails, it's probably a regular .ipynb file, not Colab format
+            pass
         
+        # If export failed, download as regular file using alt='media'
+        request = drive_service.files().get_media(fileId=file_id)
         fh = BytesIO()
         downloader = MediaIoBaseDownload(fh, request)
         done = False
@@ -176,13 +199,13 @@ def export_notebook_from_drive(drive_service, file_id):
         # Verify it's valid JSON and has cells
         notebook_json = json.loads(notebook_content)
         if 'cells' not in notebook_json:
-            print(f"  ⚠ Warning: Exported notebook missing 'cells' key")
+            print(f"  ⚠ Warning: Downloaded file missing 'cells' key")
             return None
         
         return notebook_content
         
     except Exception as e:
-        print(f"  ❌ Error exporting notebook: {e}")
+        print(f"  ❌ Error downloading notebook: {e}")
         return None
 
 def upload_to_github(file_path, notebook_content, headers):
