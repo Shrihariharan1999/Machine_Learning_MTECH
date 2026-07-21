@@ -46,7 +46,11 @@ REPO = "Machine_Learning_MTECH"
 BRANCH = "main"
 
 # Google Drive Configuration
-DRIVE_FOLDER_ID = "your_google_drive_folder_id"  # The folder ID containing your notebooks
+# Options:
+#   1. Specific folder ID (25+ characters): "1Dpf2QsEY93uDiYxquIM3w13QkJmO7OPZ"
+#   2. My Drive root: "root"
+#   3. Leave as example and update before running
+DRIVE_FOLDER_ID = "root"  # Use "root" for My Drive, or paste your folder ID here
 
 # ============================================================================
 # VALIDATION FUNCTION
@@ -80,12 +84,13 @@ def validate_configuration():
             "   1. Open your Google Drive folder with notebooks\n"
             "   2. Look at the URL: https://drive.google.com/drive/folders/YOUR_ID_HERE\n"
             "   3. Copy the YOUR_ID_HERE part\n"
+            "   OR use 'root' for My Drive\n"
             "   Update line: DRIVE_FOLDER_ID = 'your_actual_folder_id_here'"
         )
-    elif len(DRIVE_FOLDER_ID) < 20:
+    elif DRIVE_FOLDER_ID != "root" and len(DRIVE_FOLDER_ID) < 20:
         errors.append(
             "⚠ DRIVE_FOLDER_ID seems too short\n"
-            "   Google Drive IDs are usually 25+ characters"
+            "   Google Drive IDs are usually 25+ characters (or use 'root' for My Drive)"
         )
     
     # Check Owner
@@ -108,7 +113,8 @@ def validate_configuration():
     
     print("✓ Configuration validated successfully!")
     print(f"  GitHub: {OWNER}/{REPO}")
-    print(f"  Drive Folder: {DRIVE_FOLDER_ID[:30]}...")
+    folder_display = "My Drive (root)" if DRIVE_FOLDER_ID == "root" else DRIVE_FOLDER_ID[:30] + "..."
+    print(f"  Drive Folder: {folder_display}")
     print()
     return True
 
