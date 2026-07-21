@@ -38,6 +38,8 @@ from google.colab import drive
 import os
 import json
 from io import BytesIO
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload
 
 # ============================================================================
 # CONFIGURATION - UPDATE THESE VALUES
@@ -247,10 +249,6 @@ def sync_notebooks():
     # Validate configuration first
     if not validate_configuration():
         return
-    
-    # Import required libraries
-    from googleapiclient.discovery import build
-    from googleapiclient.http import MediaIoBaseDownload
     
     # Authenticate with Google Drive
     print("\n1. Authenticating with Google Drive...")
